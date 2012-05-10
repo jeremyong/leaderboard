@@ -264,11 +264,46 @@ class Leaderboard
     end
   end
   
-  # Retrieve the score for a member in the leaderboard.
+  # Retrieve the members for a rank in the leaderboard.
   # 
-  # @param member Member name.
-  #
-  # @return the score for a member in the leaderboard.
+  # @param member [Integer] rank.
+  # @param use_zero_index_for_rank [boolean, false] If the returned rank should be 0-indexed.
+  # 
+  # @return the members at a given rank in the leaderboard as a hash of members pointint to scores.
+  def members_for(rank, use_zero_index_for_rank = false)
+    members_for_in(@leaderboad_name, rank, use_zero_index_for_rank)
+  end
+  
+  # Retrieve the members for a rank in the named leaderboard.
+  # 
+  # @param leaderboard_name [String] Name of the leaderboard.
+  # @param rank [Integer] Rank.
+  # @param use_zero_index_for_rank [boolean, false] If the returned rank should be 0-indexed.
+  # 
+  # @return the members at a given rank in the leaderboard as a hash of members pointing to scores.
+  def members_for_in(leaderboard_name, rank, user_zero_index_for_rank = false)
+    if @reverse
+      if use_zero_index_for_rank
+        return Hash[*@redis_connection.zrange(leaderboard_name, rank, rank, :with_scores => true)] rescue nil
+      else
+        return Hash[*@redis_connection.zrange(leaderboard_name, rank-1, rank-1, :with_scores => true)] rescue nil
+      end
+    else
+      if use_zero_index_for_rank
+        return Hash[*@redis_connection.zrevrank(leaderboard_name, rank, rank, :with_scores => true)] rescue nil
+      else
+        return Hash[*@redis_connection.zrevrank(leaderboard_name, rank-1, rank-1, :with_scores => true)] rescue nil
+      end
+    end
+  end
+  
+  # Retrieve the rank for a member in the named leaderboard.
+  # 
+  # @param leaderboard_name [String] Name of the leaderboard.
+  # @param member [String] Member name.
+  # @param use_zero_index_for_rank [boolean, false] If the returned rank should be 0-indexed.
+  # 
+  # @return the rank for a member in the leaderboard.
   def score_for(member)
     score_for_in(@leaderboard_name, member)
   end
