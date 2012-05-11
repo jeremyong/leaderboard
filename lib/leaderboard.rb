@@ -283,13 +283,13 @@ class Leaderboard
   # @return the members at a given rank in the leaderboard as a hash of members pointing to scores.
   def members_for_in(leaderboard_name, rank, user_zero_index_for_rank = false)
     if @reverse
-      if use_zero_index_for_rank
+      if user_zero_index_for_rank
         return Hash[*@redis_connection.zrange(leaderboard_name, rank, rank, :with_scores => true)] rescue nil
       else
         return Hash[*@redis_connection.zrange(leaderboard_name, rank-1, rank-1, :with_scores => true)] rescue nil
       end
     else
-      if use_zero_index_for_rank
+      if user_zero_index_for_rank
         return Hash[*@redis_connection.zrevrank(leaderboard_name, rank, rank, :with_scores => true)] rescue nil
       else
         return Hash[*@redis_connection.zrevrank(leaderboard_name, rank-1, rank-1, :with_scores => true)] rescue nil
